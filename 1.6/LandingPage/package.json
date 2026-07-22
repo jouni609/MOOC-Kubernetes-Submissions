@@ -1,0 +1,15 @@
+{
+  "name": "landingpage-exercise-1-6",
+  "version": "1.0.0",
+  "description": "Exercise 1.6 Landing Page with NodePort Service",
+  "main": "index.js",
+  "scripts": {
+    "build": "npx @tailwindcss/cli -i ./public/style.css -o ./public/dist.css",
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@tailwindcss/cli": "^4.0.0",
+    "koa": "^2.15.0",
+    "tailwindcss": "^4.0.0"
+  }
+}
