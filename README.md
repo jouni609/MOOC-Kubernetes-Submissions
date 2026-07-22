@@ -5,4 +5,5 @@ CH 1: \
 [1.2](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/1.2/Server_Port) \
 [1.3](https://github.com/jouni609/MOOC-Kubernetes-Submissions/blob/main/1.1/Log_Output/manifests/deployment.yaml) \
 [1.4](https://github.com/jouni609/MOOC-Kubernetes-Submissions/blob/main/1.2/Server_Port/manifests/deployment.yaml) \
-[1.5](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/1.5/LandingPage)
+[1.5](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/1.5/LandingPage)  \
+[1.6](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/1.6/LandingPage)
