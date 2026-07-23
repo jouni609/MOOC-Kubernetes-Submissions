@@ -1,0 +1,16 @@
+{
+  "name": "landingpage-exercise-1-12",
+  "version": "1.0.0",
+  "description": "Exercise 1.12 Landing Page with Cached Image on Persistent Volume",
+  "main": "index.js",
+  "scripts": {
+    "build": "npx @tailwindcss/cli -i ./public/style.css -o ./public/dist.css",
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@tailwindcss/cli": "^4.0.0",
+    "axios": "^1.7.9",
+    "koa": "^2.15.0",
+    "tailwindcss": "^4.0.0"
+  }
+}
