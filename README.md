@@ -8,4 +8,5 @@ CH 1: \
 [1.5](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/1.5/LandingPage)  \
 [1.6](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/1.6/LandingPage) \
 [1.7](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/1.7/Log_Output) \
-[1.8](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/1.8/LandingPage)
+[1.8](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/1.8/LandingPage) \
+[1.9](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/1.9/Ping_Pong)
