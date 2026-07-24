@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todoapp-dep
+  namespace: project
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todoapp
+  template:
+    metadata:
+      labels:
+        app: todoapp
+    spec:
+      volumes:
+        - name: image-storage
+          persistentVolumeClaim:
+            claimName: todoapp-image-pvc
+      containers:
+        - name: todoapp
+          image: todo-app:2.4
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PORT
+              value: "3000"
+            - name: TODO_BACKEND_URL
+              value: "http://todo-backend-svc:2345/todos"
+          ports:
+            - containerPort: 3000
+          volumeMounts:
+            - name: image-storage
+              mountPath: /usr/src/app/files

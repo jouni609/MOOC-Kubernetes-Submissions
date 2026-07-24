@@ -1,0 +1,17 @@
+{
+  "name": "todo-app-exercise-2-4",
+  "version": "1.0.0",
+  "description": "Exercise 2.4 Todo Application UI in Project Namespace",
+  "main": "index.js",
+  "scripts": {
+    "build": "npx @tailwindcss/cli -i ./public/style.css -o ./public/dist.css",
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@koa/bodyparser": "^5.1.1",
+    "@tailwindcss/cli": "^4.0.0",
+    "axios": "^1.7.9",
+    "koa": "^2.15.0",
+    "tailwindcss": "^4.0.0"
+  }
+}
