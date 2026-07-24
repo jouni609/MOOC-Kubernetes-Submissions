@@ -18,3 +18,4 @@ CH 1: \
 CH 2: \
 [2.1](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/2.0)
 [2.2](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/2.2)
+[2.3](https://github.com/jouni609/MOOC-Kubernetes-Submissions/blob/main/2.3/namespace.yaml)
