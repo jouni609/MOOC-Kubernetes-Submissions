@@ -1,24 +1,24 @@
-const Koa = require('koa')
-const { bodyParser } = require('@koa/bodyparser')
-const fs = require('fs')
-const path = require('path')
-const axios = require('axios')
+import Koa from 'koa'
+import { bodyParser } from '@koa/bodyparser'
+import { existsSync, mkdirSync, createWriteStream, renameSync, writeFileSync, readFileSync, statSync, createReadStream } from 'fs'
+import { join } from 'path'
+import { get, post } from 'axios'
 
 const app = new Koa()
 const PORT = process.env.PORT || 3000
+const TODO_BACKEND_URL = process.env.TODO_BACKEND_URL || 'http://todo-backend-svc:2345/todos'
 
 app.use(bodyParser())
 
-const directory = path.join('/', 'usr', 'src', 'app', 'files')
-const imagePath = path.join(directory, 'image.jpg')
-const timestampPath = path.join(directory, 'image_timestamp.txt')
-const todosPath = path.join(directory, 'todos.json')
+const directory = join('/', 'usr', 'src', 'app', 'files')
+const imagePath = join(directory, 'image.jpg')
+const timestampPath = join(directory, 'image_timestamp.txt')
 
 const TEN_MINUTES_MS = 10 * 60 * 1000
 
 function ensureDirectoryExists() {
-  if (!fs.existsSync(directory)) {
-    fs.mkdirSync(directory, { recursive: true })
+  if (!existsSync(directory)) {
+    mkdirSync(directory, { recursive: true })
   }
 }
 
@@ -26,9 +26,9 @@ async function fetchAndSaveNewImage() {
   try {
     ensureDirectoryExists()
     console.log('Fetching new image from Lorem Picsum...')
-    const response = await axios.get('https://picsum.photos/1200', { responseType: 'stream' })
+    const response = await get('https://picsum.photos/1200', { responseType: 'stream' })
     const tempPath = `${imagePath}.tmp`
-    const writer = fs.createWriteStream(tempPath)
+    const writer = createWriteStream(tempPath)
     
     response.data.pipe(writer)
     
@@ -37,9 +37,9 @@ async function fetchAndSaveNewImage() {
       writer.on('error', reject)
     })
     
-    fs.renameSync(tempPath, imagePath)
+    renameSync(tempPath, imagePath)
     const now = Date.now()
-    fs.writeFileSync(timestampPath, now.toString())
+    writeFileSync(timestampPath, now.toString())
     console.log(`Successfully updated image.jpg on persistent volume at ${new Date(now).toISOString()}.`)
     return now
   } catch (err) {
@@ -50,7 +50,7 @@ async function fetchAndSaveNewImage() {
 
 async function getImageInfo() {
   ensureDirectoryExists()
-  const exists = fs.existsSync(imagePath)
+  const exists = existsSync(imagePath)
   
   if (!exists) {
     const newTimestamp = await fetchAndSaveNewImage()
@@ -58,10 +58,10 @@ async function getImageInfo() {
   }
 
   let lastUpdated = 0
-  if (fs.existsSync(timestampPath)) {
-    lastUpdated = parseInt(fs.readFileSync(timestampPath, 'utf-8'), 10) || 0
+  if (existsSync(timestampPath)) {
+    lastUpdated = parseInt(readFileSync(timestampPath, 'utf-8'), 10) || 0
   } else {
-    const stats = fs.statSync(imagePath)
+    const stats = statSync(imagePath)
     lastUpdated = Math.floor(stats.mtimeMs)
   }
 
@@ -73,40 +73,34 @@ async function getImageInfo() {
   return { lastUpdated }
 }
 
-function getTodos() {
-  ensureDirectoryExists()
-  if (fs.existsSync(todosPath)) {
-    try {
-      const data = fs.readFileSync(todosPath, 'utf-8')
-      const parsed = JSON.parse(data)
-      return parsed.map(t => ({
-        id: t.id || Date.now().toString(),
-        text: t.text || '',
-        completed: Boolean(t.completed),
-        createdAt: t.createdAt || new Date().toISOString()
-      }))
-    } catch (err) {
-      console.error('Error reading todos.json:', err.message)
-      return []
-    }
+async function fetchTodosFromBackend() {
+  try {
+    const response = await get(TODO_BACKEND_URL)
+    return response.data || []
+  } catch (err) {
+    console.error(`Error fetching TODOs from backend (${TODO_BACKEND_URL}):`, err.message)
+    return []
   }
-  return []
 }
 
-function saveTodos(todos) {
-  ensureDirectoryExists()
-  fs.writeFileSync(todosPath, JSON.stringify(todos, null, 2), 'utf-8')
+async function createTodoInBackend(text) {
+  try {
+    await post(TODO_BACKEND_URL, { text })
+    console.log(`Successfully created TODO in backend: "${text}"`)
+  } catch (err) {
+    console.error(`Error creating TODO in backend (${TODO_BACKEND_URL}):`, err.message)
+  }
 }
 
 app.use(async ctx => {
   // Static CSS file route
   if (ctx.path === '/style.css') {
     ctx.type = 'text/css'
-    const cssPath = path.join(__dirname, 'public', 'dist.css')
-    if (fs.existsSync(cssPath)) {
-      ctx.body = fs.createReadStream(cssPath)
+    const cssPath = join(__dirname, 'public', 'dist.css')
+    if (existsSync(cssPath)) {
+      ctx.body = createReadStream(cssPath)
     } else {
-      ctx.body = fs.createReadStream(path.join(__dirname, 'public', 'style.css'))
+      ctx.body = createReadStream(join(__dirname, 'public', 'style.css'))
     }
     return
   }
@@ -114,47 +108,13 @@ app.use(async ctx => {
   // Image route
   if (ctx.path === '/image.jpg') {
     await getImageInfo()
-    if (fs.existsSync(imagePath)) {
+    if (existsSync(imagePath)) {
       ctx.type = 'image/jpeg'
-      ctx.body = fs.createReadStream(imagePath)
+      ctx.body = createReadStream(imagePath)
     } else {
       ctx.status = 404
       ctx.body = 'Image loading...'
     }
-    return
-  }
-
-  // Toggle todo completion endpoint
-  if (ctx.method === 'POST' && ctx.path.startsWith('/todos/toggle')) {
-    const body = ctx.request.body || {}
-    const id = body.id || ctx.path.split('/')[3]
-    if (id) {
-      const todos = getTodos()
-      const todo = todos.find(t => t.id === id)
-      if (todo) {
-        todo.completed = !todo.completed
-        saveTodos(todos)
-        console.log(`Toggled completion for TODO "${todo.text}": completed = ${todo.completed}`)
-      }
-    }
-    ctx.redirect('/')
-    return
-  }
-
-  // Delete todo endpoint
-  if (ctx.method === 'POST' && ctx.path.startsWith('/todos/delete')) {
-    const body = ctx.request.body || {}
-    const id = body.id || ctx.path.split('/')[3]
-    if (id) {
-      let todos = getTodos()
-      const initialCount = todos.length
-      todos = todos.filter(t => t.id !== id)
-      if (todos.length < initialCount) {
-        saveTodos(todos)
-        console.log(`Deleted TODO with id ${id}`)
-      }
-    }
-    ctx.redirect('/')
     return
   }
 
@@ -164,15 +124,7 @@ app.use(async ctx => {
     const text = (body.todo || body.text || '').trim()
 
     if (text.length > 0 && text.length <= 140) {
-      const todos = getTodos()
-      todos.push({
-        id: Date.now().toString(),
-        text: text,
-        completed: false,
-        createdAt: new Date().toISOString()
-      })
-      saveTodos(todos)
-      console.log(`Created new TODO (${text.length} chars): "${text}"`)
+      await createTodoInBackend(text)
     } else if (text.length > 140) {
       console.warn(`Rejected TODO: Exceeds 140 characters (${text.length} chars)`)
     }
@@ -185,7 +137,7 @@ app.use(async ctx => {
 
   // Main UI route (GET /)
   const { lastUpdated } = await getImageInfo()
-  const todos = getTodos()
+  const todos = await fetchTodosFromBackend()
 
   const todoItemsHtml = todos.length > 0
     ? todos.map(t => {
@@ -197,14 +149,7 @@ app.use(async ctx => {
       return `
       <li class="flex items-center justify-between p-3.5 bg-slate-900/60 border border-slate-700/50 rounded-xl hover:border-slate-600 transition-colors group">
         <div class="flex items-center space-x-3 flex-1 min-w-0 pr-2">
-          <!-- Toggle Checkbox Form -->
-          <form action="/todos/toggle" method="POST" class="inline-flex items-center">
-            <input type="hidden" name="id" value="${t.id}" />
-            <button type="submit" class="w-5 h-5 rounded-md border ${t.completed ? 'bg-emerald-500 border-emerald-500 text-slate-950' : 'border-slate-600 hover:border-sky-400'} flex items-center justify-center transition-all cursor-pointer">
-              ${t.completed ? '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>' : ''}
-            </button>
-          </form>
-          
+          <span class="w-2 h-2 rounded-full ${t.completed ? 'bg-emerald-400' : 'bg-sky-400'} shrink-0"></span>
           <span class="text-sm font-medium break-all ${textStyle}">${escapeHtml(t.text)}</span>
         </div>
 
@@ -212,16 +157,6 @@ app.use(async ctx => {
           <span class="text-[10px] font-mono px-2 py-0.5 rounded-full border ${badgeStyle}">
             ${t.completed ? 'Done' : 'Pending'}
           </span>
-
-          <!-- Delete Form -->
-          <form action="/todos/delete" method="POST" class="inline">
-            <input type="hidden" name="id" value="${t.id}" />
-            <button type="submit" title="Delete TODO" class="p-1 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-              </svg>
-            </button>
-          </form>
         </div>
       </li>
     `}).join('')
@@ -248,7 +183,7 @@ app.use(async ctx => {
       </h1>
     </div>
 
-    <!-- Cached Image Display with Live Countdown Timer in Bottom Right -->
+    <!-- Cached Image Display -->
     <div id="image-container" data-last-updated="${lastUpdated}" class="relative rounded-xl overflow-hidden border border-slate-700/60 shadow-md bg-slate-950 flex items-center justify-center min-h-55">
       <img id="main-image" src="/image.jpg" alt="Daily Image" class="w-full h-56 object-contain mx-auto">
       
@@ -341,5 +276,5 @@ function escapeHtml(str) {
     .replace(/'/g, '&#039;')
 }
 
-console.log(`Todo App server starting on port ${PORT}...`)
+console.log(`Todo App server starting on port ${PORT}. Target TODO_BACKEND_URL: ${TODO_BACKEND_URL}...`)
 app.listen(PORT)

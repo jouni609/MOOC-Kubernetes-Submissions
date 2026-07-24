@@ -119,3 +119,6 @@ docker-compose.override.yml
 # --- Agents ---
 AGENTS.md
 .agents/
+
+# --- Node modules ---
+node_modules/
