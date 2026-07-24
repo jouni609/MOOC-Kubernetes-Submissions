@@ -16,4 +16,4 @@ CH 1: \
 [1.13](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/1.13)
 
 CH 2: \
-[2.0](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/2.0)
+[2.1](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/2.0)
