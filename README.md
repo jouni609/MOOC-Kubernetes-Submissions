@@ -23,3 +23,4 @@ CH 2: \
 [2.5](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/2.5/Log_Output)
 [2.6](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/2.6)
 [2.7](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/2.7)
+[2.8](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/2.8)
