@@ -26,3 +26,6 @@ CH 2: \
 [2.8](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/2.8)
 [2.9](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/2.9)
 [2.10](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/2.10)
+
+CH 3: \
+[3.1](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/3.1)
