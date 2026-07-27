@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: todo-app-config
+  namespace: project
+data:
+  PORT: "3000"
+  TODO_BACKEND_URL: "http://todo-backend-svc:2345/todos"
+  FILES_DIR: "/usr/src/app/files"
+  IMAGE_URL: "https://picsum.photos/1200"
+  IMAGE_REFRESH_INTERVAL_MS: "600000"
+  MAX_TODO_LENGTH: "140"
