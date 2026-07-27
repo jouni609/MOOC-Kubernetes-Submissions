@@ -105,6 +105,10 @@ Desktop.ini
 .env
 .env.*
 !.env.example
+secret.yaml
+secrets.yaml
+!secret.example.yaml
+!secrets.example.yaml
 *.pfx
 *.p12
 secrets/
