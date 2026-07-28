@@ -64,7 +64,7 @@ jobs:
           if [[ "${GITHUB_REF_NAME}" == "main" ]]; then
             target_namespace="project"
           else
-            target_namespace="${GITHUB_REF_NAME}"
+            target_namespace="${GITHUB_REF_NAME//./-}"
           fi
 
           echo "PROJECT_DIR=${project_dir}" >> "${GITHUB_ENV}"
