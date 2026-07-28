@@ -1,0 +1,25 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: dwk-routes
+  namespace: exercises
+spec:
+  parentRefs:
+    - name: dwk-gateway
+      kind: Gateway
+      group: gateway.networking.k8s.io
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /pingpong
+      backendRefs:
+        - name: pingpong-svc
+          port: 2345
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: log-output-svc
+          port: 2345
