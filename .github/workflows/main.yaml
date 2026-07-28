@@ -1,0 +1,173 @@
+name: Release project
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  REGISTRY: europe-north1-docker.pkg.dev
+  REPOSITORY: moocimages
+  GKE_CLUSTER: dwk-cluster
+  GKE_ZONE: europe-north1-a
+
+concurrency:
+  group: project-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build, publish and deploy
+    runs-on: ubuntu-latest
+    environment: GKE_PROJECT
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Check active project
+        id: project
+        shell: bash
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          CURRENT_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          pointer_file=".github/project-directory.txt"
+          project_dir="$(tr -d '[:space:]' < "${pointer_file}")"
+
+          if [[ ! "${project_dir}" =~ ^[0-9]+\.[0-9]+$ ]] ||
+             [[ ! -d "${project_dir}" ]]; then
+            echo "::error file=${pointer_file}::Invalid project exercise directory '${project_dir}'."
+            exit 1
+          fi
+
+          namespace_file="${project_dir}/namespace.yaml"
+          if [[ ! -f "${namespace_file}" ]] ||
+             ! grep -Eq '^[[:space:]]*name:[[:space:]]*project[[:space:]]*$' "${namespace_file}"; then
+            echo "::error file=${namespace_file}::Active workspace must define Namespace 'project'."
+            exit 1
+          fi
+
+          for app in Todo_App Todo_Backend Todo_Job; do
+            if [[ ! -f "${project_dir}/${app}/Dockerfile" ]]; then
+              echo "::error::Missing Dockerfile: ${project_dir}/${app}/Dockerfile"
+              exit 1
+            fi
+          done
+
+          echo "PROJECT_DIR=${project_dir}" >> "${GITHUB_ENV}"
+
+          if [[ "${BEFORE_SHA}" =~ ^0+$ ]] ||
+             ! git cat-file -e "${BEFORE_SHA}^{commit}" 2>/dev/null ||
+             ! git diff --quiet "${BEFORE_SHA}" "${CURRENT_SHA}" -- \
+               "${project_dir}/" "${pointer_file}"; then
+            echo "changed=true" >> "${GITHUB_OUTPUT}"
+            echo "Active project '${project_dir}' changed; starting release."
+          else
+            echo "changed=false" >> "${GITHUB_OUTPUT}"
+            echo "Active project '${project_dir}' did not change; skipping release."
+          fi
+
+      - name: Authenticate to Google Cloud
+        if: steps.project.outputs.changed == 'true'
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ secrets.GKE_PROJECT }}
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        if: steps.project.outputs.changed == 'true'
+        uses: google-github-actions/setup-gcloud@v3
+
+      - name: Configure Docker registry
+        if: steps.project.outputs.changed == 'true'
+        run: gcloud --quiet auth configure-docker "${REGISTRY}"
+
+      - name: Form image names
+        if: steps.project.outputs.changed == 'true'
+        shell: bash
+        env:
+          PROJECT_ID: ${{ secrets.GKE_PROJECT }}
+        run: |
+          image_base="${REGISTRY}/${PROJECT_ID}/${REPOSITORY}"
+          image_tag="${GITHUB_REF_NAME}-${GITHUB_SHA}"
+
+          echo "TODO_APP_IMAGE=${image_base}/todo-app:${image_tag}" >> "${GITHUB_ENV}"
+          echo "TODO_BACKEND_IMAGE=${image_base}/todo-backend:${image_tag}" >> "${GITHUB_ENV}"
+          echo "TODO_JOB_IMAGE=${image_base}/todo-job:${image_tag}" >> "${GITHUB_ENV}"
+
+      - name: Build images
+        if: steps.project.outputs.changed == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          docker build --tag "${TODO_APP_IMAGE}" "${PROJECT_DIR}/Todo_App"
+          docker build --tag "${TODO_BACKEND_IMAGE}" "${PROJECT_DIR}/Todo_Backend"
+          docker build --tag "${TODO_JOB_IMAGE}" "${PROJECT_DIR}/Todo_Job"
+
+      - name: Publish images
+        if: steps.project.outputs.changed == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          docker push "${TODO_APP_IMAGE}"
+          docker push "${TODO_BACKEND_IMAGE}"
+          docker push "${TODO_JOB_IMAGE}"
+
+      - name: Get GKE credentials
+        if: steps.project.outputs.changed == 'true'
+        uses: google-github-actions/get-gke-credentials@v3
+        with:
+          cluster_name: ${{ env.GKE_CLUSTER }}
+          project_id: ${{ secrets.GKE_PROJECT }}
+          location: ${{ env.GKE_ZONE }}
+
+      - name: Set up Kustomize
+        if: steps.project.outputs.changed == 'true'
+        uses: imranismail/setup-kustomize@v3
+
+      - name: Deploy
+        if: steps.project.outputs.changed == 'true'
+        shell: bash
+        env:
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+        run: |
+          set -euo pipefail
+
+          kubectl create secret generic postgres-secret \
+            --namespace project \
+            --from-literal="POSTGRES_PASSWORD=${POSTGRES_PASSWORD}" \
+            --dry-run=client \
+            --output yaml \
+            > "${PROJECT_DIR}/Todo_Backend/manifests/secret.yaml"
+
+          cd "${PROJECT_DIR}"
+
+          kustomize edit set image \
+            "todo-app=${TODO_APP_IMAGE}" \
+            "todo-backend=${TODO_BACKEND_IMAGE}" \
+            "todo-job=${TODO_JOB_IMAGE}"
+
+          kustomize build . | kubectl apply -f -
+
+          kubectl rollout status statefulset/postgres-ss \
+            --namespace project \
+            --timeout 5m
+          kubectl rollout status deployment/todo-backend-dep \
+            --namespace project \
+            --timeout 5m
+          kubectl rollout status deployment/todoapp-dep \
+            --namespace project \
+            --timeout 5m
+          kubectl get services --namespace project --output wide
