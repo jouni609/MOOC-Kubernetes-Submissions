@@ -1,0 +1,67 @@
+name: Delete branch environment
+
+on:
+  delete:
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  GKE_CLUSTER: dwk-cluster
+  GKE_ZONE: europe-north1-a
+
+concurrency:
+  group: project-environment-${{ github.event.ref }}
+  cancel-in-progress: false
+
+jobs:
+  delete-environment:
+    name: Delete branch environment
+    if: >-
+      github.event.ref_type == 'branch' &&
+      github.event.ref != 'main' &&
+      github.event.ref != 'project'
+    runs-on: ubuntu-latest
+    environment: GKE_PROJECT
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ secrets.GKE_PROJECT }}
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v3
+
+      - name: Get GKE credentials
+        uses: google-github-actions/get-gke-credentials@v3
+        with:
+          cluster_name: ${{ env.GKE_CLUSTER }}
+          project_id: ${{ secrets.GKE_PROJECT }}
+          location: ${{ env.GKE_ZONE }}
+
+      - name: Delete environment
+        shell: bash
+        env:
+          DELETED_BRANCH: ${{ github.event.ref }}
+        run: |
+          set -euo pipefail
+
+          target_namespace="${DELETED_BRANCH//./-}"
+
+          if [[ -z "${target_namespace}" ]] ||
+             [[ "${target_namespace}" == "main" ]] ||
+             [[ "${target_namespace}" == "project" ]]; then
+            echo "::error::Refusing to delete protected namespace '${target_namespace}'."
+            exit 1
+          fi
+
+          kubectl delete namespace "${target_namespace}" \
+            --ignore-not-found=true \
+            --wait=false
