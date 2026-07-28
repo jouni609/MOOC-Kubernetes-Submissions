@@ -32,3 +32,4 @@ CH 3: \
 [3.2](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/3.2)
 [3.3](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/3.3)
 [3.4](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/3.4)
+[3.5](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/3.5)
