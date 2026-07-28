@@ -2,8 +2,6 @@ name: Release project
 
 on:
   push:
-    branches:
-      - main
 
 permissions:
   contents: read
@@ -16,7 +14,7 @@ env:
   GKE_ZONE: europe-north1-a
 
 concurrency:
-  group: project-release
+  group: project-release-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -63,7 +61,15 @@ jobs:
             fi
           done
 
+          if [[ "${GITHUB_REF_NAME}" == "main" ]]; then
+            target_namespace="project"
+          else
+            target_namespace="${GITHUB_REF_NAME}"
+          fi
+
           echo "PROJECT_DIR=${project_dir}" >> "${GITHUB_ENV}"
+          echo "TARGET_NAMESPACE=${target_namespace}" >> "${GITHUB_ENV}"
+          echo "Release namespace: ${target_namespace}"
 
           if [[ "${BEFORE_SHA}" =~ ^0+$ ]] ||
              ! git cat-file -e "${BEFORE_SHA}^{commit}" 2>/dev/null ||
@@ -145,8 +151,15 @@ jobs:
         run: |
           set -euo pipefail
 
+          kubectl create namespace "${TARGET_NAMESPACE}" \
+            --dry-run=client \
+            --output yaml \
+            | kubectl apply -f -
+          kubectl config set-context --current \
+            --namespace="${TARGET_NAMESPACE}"
+
           kubectl create secret generic postgres-secret \
-            --namespace project \
+            --namespace "${TARGET_NAMESPACE}" \
             --from-literal="POSTGRES_PASSWORD=${POSTGRES_PASSWORD}" \
             --dry-run=client \
             --output yaml \
@@ -154,6 +167,7 @@ jobs:
 
           cd "${PROJECT_DIR}"
 
+          kustomize edit set namespace "${TARGET_NAMESPACE}"
           kustomize edit set image \
             "todo-app=${TODO_APP_IMAGE}" \
             "todo-backend=${TODO_BACKEND_IMAGE}" \
@@ -162,12 +176,14 @@ jobs:
           kustomize build . | kubectl apply -f -
 
           kubectl rollout status statefulset/postgres-ss \
-            --namespace project \
+            --namespace "${TARGET_NAMESPACE}" \
             --timeout 5m
           kubectl rollout status deployment/todo-backend-dep \
-            --namespace project \
+            --namespace "${TARGET_NAMESPACE}" \
             --timeout 5m
           kubectl rollout status deployment/todoapp-dep \
-            --namespace project \
+            --namespace "${TARGET_NAMESPACE}" \
             --timeout 5m
-          kubectl get services --namespace project --output wide
+          kubectl get services \
+            --namespace "${TARGET_NAMESPACE}" \
+            --output wide
