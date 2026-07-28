@@ -35,3 +35,4 @@ CH 3: \
 [3.5](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/3.5)
 [3.6](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/.github)
 [3.7](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/3.7)
+[3.8](https://github.com/jouni609/MOOC-Kubernetes-Submissions/blob/main/.github/workflows/delete-environment.yaml)
