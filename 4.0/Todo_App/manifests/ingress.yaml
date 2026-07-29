@@ -4,6 +4,7 @@ metadata:
   name: todoapp-ingress
   namespace: project
 spec:
+  ingressClassName: traefik
   rules:
     - http:
         paths:

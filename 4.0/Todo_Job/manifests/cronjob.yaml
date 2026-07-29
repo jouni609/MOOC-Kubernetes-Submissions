@@ -12,7 +12,7 @@ spec:
           containers:
             - name: todo-backup-job
               image: todo-job
-              imagePullPolicy: Always
+              imagePullPolicy: IfNotPresent
               env:
                 - name: POSTGRES_HOST
                   valueFrom:

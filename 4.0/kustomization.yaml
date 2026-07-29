@@ -6,6 +6,7 @@ resources:
   - Todo_App/manifests/deployment.yaml
   - Todo_App/manifests/service.yaml
   - Todo_App/manifests/pvc.yaml
+  - Todo_App/manifests/ingress.yaml
   - Todo_Backend/manifests/configmap.yaml
   - Todo_Backend/manifests/deployment.yaml
   - Todo_Backend/manifests/service.yaml

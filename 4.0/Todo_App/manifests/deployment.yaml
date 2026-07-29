@@ -22,7 +22,7 @@ spec:
       containers:
         - name: todoapp
           image: todo-app
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           envFrom:
             - configMapRef:
                 name: todo-app-config
