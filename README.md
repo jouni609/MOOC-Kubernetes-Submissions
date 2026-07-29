@@ -38,6 +38,7 @@ CH 3: \
 [3.8](https://github.com/jouni609/MOOC-Kubernetes-Submissions/blob/main/.github/workflows/delete-environment.yaml)
 [3.10](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/3.10)
 [3.11](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/3.11)
+[3.12](https://github.com/jouni609/MOOC-Kubernetes-Submissions/blob/main/3.12/Log_Output_Testrun.png)
 
 ------------------------------------------
 Exercise **3.9**
