@@ -1,7 +1,7 @@
 {
-  "name": "todo-app-exercise-3-8",
+  "name": "todo-app-exercise-3-10",
   "version": "1.0.0",
-  "description": "Exercise 3.8 Todo Application UI (automatic branch environment cleanup)",
+  "description": "Exercise 3.10 Todo Application UI",
   "main": "index.js",
   "scripts": {
     "build": "npx @tailwindcss/cli -i ./public/style.css -o ./public/dist.css",

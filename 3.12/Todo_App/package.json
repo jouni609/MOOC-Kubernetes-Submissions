@@ -1,7 +1,7 @@
 {
-  "name": "todo-app-exercise-3-11",
+  "name": "todo-app-exercise-3-12",
   "version": "1.0.0",
-  "description": "Exercise 3.11 Todo Application UI",
+  "description": "Exercise 3.12 Todo Application UI",
   "main": "index.js",
   "scripts": {
     "build": "npx @tailwindcss/cli -i ./public/style.css -o ./public/dist.css",

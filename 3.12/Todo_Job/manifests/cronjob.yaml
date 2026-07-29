@@ -1,0 +1,57 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: todo-backup-cronjob
+  namespace: project
+spec:
+  schedule: "0 0 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: todo-backup-job
+              image: todo-job
+              imagePullPolicy: Always
+              env:
+                - name: POSTGRES_HOST
+                  valueFrom:
+                    configMapKeyRef:
+                      name: todo-backend-config
+                      key: POSTGRES_HOST
+                - name: POSTGRES_USER
+                  valueFrom:
+                    configMapKeyRef:
+                      name: todo-backend-config
+                      key: POSTGRES_USER
+                - name: POSTGRES_DB
+                  valueFrom:
+                    configMapKeyRef:
+                      name: todo-backend-config
+                      key: POSTGRES_DB
+                - name: POSTGRES_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: postgres-secret
+                      key: POSTGRES_PASSWORD
+                - name: BUCKET_NAME
+                  value: "mooc_backup"
+                - name: GOOGLE_APPLICATION_CREDENTIALS
+                  value: "/etc/gcp/key.json"
+              resources:
+                requests:
+                  cpu: "10m"
+                  memory: "50Mi"
+                limits:
+                  cpu: "200m"
+                  memory: "256Mi"
+              volumeMounts:
+                - name: secret-volume
+                  mountPath: "/etc/gcp"
+                  readOnly: true
+          volumes:
+            - name: secret-volume
+              secret:
+                secretName: storage-sa-key
+                optional: true
+          restartPolicy: OnFailure
