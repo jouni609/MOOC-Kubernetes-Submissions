@@ -43,6 +43,7 @@ CH 3: \
 CH 4: \
 [4.1](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/4.1)
 [4.2](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/4.2)
+[4.3](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/4.3)
 
 ------------------------------------------
 Exercise **3.9**
