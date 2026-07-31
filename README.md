@@ -40,6 +40,9 @@ CH 3: \
 [3.11](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/3.11)
 [3.12](https://github.com/jouni609/MOOC-Kubernetes-Submissions/blob/main/3.12/Log_Output_Testrun.png)
 
+CH 4: \
+[4.1](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/4.1)
+
 ------------------------------------------
 Exercise **3.9**
 
