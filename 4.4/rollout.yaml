@@ -1,0 +1,51 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: pingpong-dep
+  namespace: exercises
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: pingpong
+  strategy:
+    canary:
+      steps:
+        - setWeight: 50
+        - analysis:
+            templates:
+              - templateName: pingpong-cpu
+        - pause:
+            duration: 30s
+  template:
+    metadata:
+      labels:
+        app: pingpong
+    spec:
+      containers:
+        - name: pingpong
+          image: jouni609/ping-pong:4.1
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: pingpong-config
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+          ports:
+            - containerPort: 3000
+          readinessProbe:
+            httpGet:
+              path: /healthprobe
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
