@@ -1,0 +1,27 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - Todo_App/manifests/configmap.yaml
+  - Todo_App/manifests/deployment.yaml
+  - Todo_App/manifests/service.yaml
+  - Todo_App/manifests/pvc.yaml
+  - Todo_App/manifests/ingress.yaml
+  - Todo_Backend/manifests/configmap.yaml
+  - Todo_Backend/manifests/deployment.yaml
+  - Todo_Backend/manifests/service.yaml
+  - Todo_Backend/manifests/postgres-service.yaml
+  - Todo_Backend/manifests/postgres-statefulset.yaml
+  - Todo_Backend/manifests/secret.yaml
+  - broadcaster/manifests/deployment.yaml
+
+images:
+  - name: todo-app
+    newName: jouni609/todo-app
+    newTag: "4.8"
+  - name: todo-backend
+    newName: jouni609/todo-backend
+    newTag: "4.8"
+  - name: broadcaster
+    newName: jouni609/broadcaster
+    newTag: "4.8"
