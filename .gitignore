@@ -124,5 +124,9 @@ docker-compose.override.yml
 AGENTS.md
 .agents/
 
-# --- Node modules ---
+# --- Node / TypeScript ---
 node_modules/
+dist/
+*.tsbuildinfo
+.npm/
+.pnpm-store/

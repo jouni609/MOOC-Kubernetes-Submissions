@@ -1,0 +1,24 @@
+{
+  // TypeScript 7.0 conventions (native tsc):
+  // - strict, stableTypeOrdering on by default
+  // - no moduleResolution "node" / target es5 / baseUrl
+  // - rootDir must be set when sources live under src/
+  // - types defaults to [] — list @types packages explicitly
+  "compilerOptions": {
+    "target": "es2022",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "lib": ["es2022"],
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "types": ["node"],
+    "strict": true,
+    "skipLibCheck": true,
+    "noUncheckedSideEffectImports": true,
+    "rewriteRelativeImportExtensions": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "sourceMap": true
+  },
+  "include": ["./src/**/*.ts"]
+}
