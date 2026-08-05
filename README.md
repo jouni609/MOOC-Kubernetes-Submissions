@@ -49,6 +49,7 @@ CH 4: \
 [4.6](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/4.6/broadcaster)
 [4.7](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/4.7)
 [4.8](https://github.com/jouni609/MOOC-Kubernetes-Submissions/blob/main/4.8/application.yaml)
+[4.9](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/4.9)
 
 ------------------------------------------
 Exercise **3.9**
