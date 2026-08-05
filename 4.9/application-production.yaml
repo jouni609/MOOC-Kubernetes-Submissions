@@ -8,10 +8,10 @@ spec:
   source:
     repoURL: https://github.com/jouni609/MOOC-Kubernetes-Submissions.git
     # Only tagged commits deploy to production.
-    # Course release tag is 4.9.0 (not v4.9.0):
-    #   git tag 4.9.0 && git push origin 4.9.0
+    # Course release tag 4.9 (was 4.9.0 before):
+    #   git tag 4.9 && git push origin 4.9
     # Later releases: retarget this Application to the new tag name.
-    targetRevision: 4.9.0
+    targetRevision: 4.9
     path: 4.9/overlays/production
   destination:
     server: https://kubernetes.default.svc
