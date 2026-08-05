@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: broadcaster-dep
+spec:
+  replicas: 6
+  selector:
+    matchLabels:
+      app: broadcaster
+  template:
+    metadata:
+      labels:
+        app: broadcaster
+    spec:
+      containers:
+        - name: broadcaster
+          image: broadcaster
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: NATS_URL
+              value: "nats://my-nats:4222"
+            - name: WEBHOOK_URL
+              value: "https://httpbin.org/post"
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "40Mi"
+            limits:
+              cpu: "100m"
+              memory: "100Mi"
+

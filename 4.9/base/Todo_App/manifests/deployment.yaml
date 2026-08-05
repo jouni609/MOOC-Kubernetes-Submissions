@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todoapp-dep
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: todoapp
+  template:
+    metadata:
+      labels:
+        app: todoapp
+    spec:
+      volumes:
+        - name: image-storage
+          persistentVolumeClaim:
+            claimName: todoapp-image-pvc
+      containers:
+        - name: todoapp
+          image: todo-app
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: todo-app-config
+          ports:
+            - containerPort: 3000
+          readinessProbe:
+            httpGet:
+              path: /healthprobe
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "5m"
+              memory: "50Mi"
+            limits:
+              cpu: "100m"
+              memory: "128Mi"
+          volumeMounts:
+            - name: image-storage
+              mountPath: /usr/src/app/files
