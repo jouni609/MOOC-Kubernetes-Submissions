@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wiki-dep
+  namespace: exercises
+  labels:
+    app: wiki
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wiki
+  template:
+    metadata:
+      labels:
+        app: wiki
+    spec:
+      volumes:
+        - name: www
+          emptyDir: {}
+      initContainers:
+        - name: fetch-kubernetes
+          image: curlimages/curl:8.5.0
+          command:
+            - sh
+            - -c
+            - |
+              curl -fsSL -A "wiki-init/5.4" \
+                -o /usr/share/nginx/html/index.html \
+                https://en.wikipedia.org/wiki/Kubernetes && \
+              chmod 666 /usr/share/nginx/html/index.html
+          volumeMounts:
+            - name: www
+              mountPath: /usr/share/nginx/html
+      containers:
+        - name: nginx
+          image: nginx:1.27-alpine
+          ports:
+            - containerPort: 80
+              name: http
+          volumeMounts:
+            - name: www
+              mountPath: /usr/share/nginx/html
+        - name: random-wiki
+          image: wiki-sidecar:5.4
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            runAsUser: 0
+          env:
+            - name: WWW_DIR
+              value: /usr/share/nginx/html
+            - name: WIKI_URL
+              value: https://en.wikipedia.org/wiki/Special:Random
+          volumeMounts:
+            - name: www
+              mountPath: /usr/share/nginx/html
