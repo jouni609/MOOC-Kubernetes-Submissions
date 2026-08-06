@@ -54,6 +54,7 @@ CH 4: \
 
 CH 5: \
 [5.1](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/5.1)
+[5.2](https://github.com/jouni609/MOOC-Kubernetes-Submissions/blob/main/5.2/ex5-2-ss.png)
 
 ------------------------------------------
 Exercise **3.9**
