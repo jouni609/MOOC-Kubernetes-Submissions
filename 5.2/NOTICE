@@ -1,0 +1,12 @@
+Third-party components under Apache License 2.0 (see LICENSE):
+
+  samples/bookinfo/*   Istio Bookinfo sample
+  samples/curl/*       Istio curl sample
+  samples/addons/kiali.yaml
+                       Istio Kiali addon sample (URLs adjusted for host Prometheus/Grafana)
+
+Source: https://github.com/istio/istio
+Copyright The Istio Authors
+
+Kiali chart metadata embedded in kiali.yaml may reference
+additional upstream project licenses (Kiali, Helm charts).
