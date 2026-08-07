@@ -58,6 +58,7 @@ CH 5: \
 [5.3](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/5.3)
 [5.4](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/5.4)
 [5.6](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/5.6/Knative_Service)
+[5.7](https://github.com/jouni609/MOOC-Kubernetes-Submissions/tree/main/5.7)
 
 ------------------------------------------
 Exercise **3.9**
