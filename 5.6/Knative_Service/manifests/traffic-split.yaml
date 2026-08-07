@@ -1,0 +1,27 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: traffic-example
+  namespace: exercises
+spec:
+  template:
+    metadata:
+      name: traffic-example-v2
+    spec:
+      containers:
+        - name: user-container
+          image: ghcr.io/knative/helloworld-go:latest
+          env:
+            - name: TARGET
+              value: Revision v2
+          readinessProbe:
+            successThreshold: 1
+            tcpSocket:
+              port: 0
+  traffic:
+    - revisionName: traffic-example-v1
+      percent: 50
+      tag: v1
+    - revisionName: traffic-example-v2
+      percent: 50
+      tag: v2
